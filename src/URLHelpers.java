@@ -2,6 +2,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class URLHelpers {
 	
@@ -31,7 +33,7 @@ public class URLHelpers {
 		return baseURL;
 	}
 	
-	static boolean isExternal(String baseURL, GR gr, boolean strictVal) {
+	static boolean isExternal(String baseURL, GR gr, boolean strict) {
 		baseURL = URLHelpers.removePath(baseURL);
 		String checkURL = gr.getSt();
 		if (checkURL.startsWith("/")) {
@@ -39,17 +41,52 @@ public class URLHelpers {
 		}
 		if (gr.isChanged()) {
 			boolean sameURL;
-			if(strictVal) {
+			if(strict) {
 				sameURL = checkURL.startsWith(baseURL);				
 			}else {
-				sameURL = checkURL.contains(baseURL);
+				// TODO baseURL a.hin.ch doesn't match with c.hin.ch
+				String checkURLNoSub = removeSubdomains(checkURL);
+				String baseURLNoSub = removeSubdomains(baseURL);
+				
+				sameURL = checkURLNoSub.contains(baseURLNoSub);
 				if(!sameURL) {
-					sameURL = baseURL.contains(URLHelpers.removePath(checkURL));
+					sameURL = baseURLNoSub.contains(URLHelpers.removePath(checkURLNoSub));
 				}
 			}
 			return !sameURL;
 		}
 		return false;
+	}
+	
+	public static String removeSubdomains(String url) {
+		String protocol="";
+		int cut = 0;
+		
+		String containsProtocolPattern = "^([a-zA-Z]*:\\/\\/)|^(\\/\\/)";
+		Pattern pattern = Pattern.compile(containsProtocolPattern);
+		Matcher m = pattern.matcher(url);
+	    if (m.find( )) {	      
+	    	protocol=m.group();
+	    	cut = protocol.length();
+	    }
+		url = url.substring(cut);
+					
+		String urlDomain=url;
+		String path="";
+		if(urlDomain.contains("/")) {
+			int slashPos = urlDomain.indexOf("/");
+			path=urlDomain.substring(slashPos);
+			urlDomain=urlDomain.substring(0, slashPos);
+		}
+		
+		int dotCount = Strng.countOccurrences(urlDomain, ".");
+		if(dotCount==1){
+			return protocol+url;
+		}
+		int pos = Strng.nthLastIndexOf(2, ".", urlDomain)+1;
+		urlDomain = urlDomain.substring(pos);
+					
+		return protocol+urlDomain+path;
 	}
 
 	public static String getHTTP(String url, boolean jsonOutput, boolean quietVal) throws Exception {

@@ -26,7 +26,7 @@ public class ERC {
 
 	public static void main(String[] args) throws MalformedURLException {
 		
-		
+
 		jsonOutputB.append("{");
 		
 		CommandLine cmd = parseArgs(args);
@@ -91,9 +91,9 @@ public class ERC {
 		Option quiet = new Option("q", "quiet", false, "don't output further HTTP call notices");
 		options.addOption(quiet);
 		
-		Option strict = new Option("s", "strict", false, "consider subdomains as external");
+		Option strict = new Option("s", "strict", false, "consider subdomains as external content");
 		options.addOption(strict);
-
+	
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
 		CommandLine cmd = null;
