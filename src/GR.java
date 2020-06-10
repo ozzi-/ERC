@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 
 public class GR {
 	private String st;
@@ -22,5 +23,17 @@ public class GR {
 
 	public void setChanged(boolean changed) {
 		this.changed = changed;
+	}
+	
+	public static GR clean(String src) {
+		src = src.toLowerCase();
+		ArrayList<String> starts = new ArrayList<String>();
+		starts.add("https://");
+		starts.add("http://");
+		starts.add("//");
+		starts.add("www.");
+		String cleaned = Strng.removeIfStartsWith(src, starts);
+		boolean changed = cleaned.length() != src.length();
+		return new GR(cleaned, changed);
 	}
 }
