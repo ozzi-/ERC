@@ -46,7 +46,7 @@ public class ERC {
 			} catch (Exception e2) {
 				e2.printStackTrace();
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		if(jsonOutput) {
@@ -106,10 +106,15 @@ public class ERC {
 		}
 		return cmd;
 	}
-
-	private static void doCheck(String url) throws IOException {
+	
+	// 	TODO proxy support
+	// TODO user agent?
+	private static void doCheck(String url) throws Exception {
 		String cleanURL = GR.clean(url).getSt();
-		Document doc = Jsoup.connect(url).followRedirects(true).get();
+		String res = URLHelpers.getHTTP(url, false, true);
+		System.out.println("RESULT:"+res.substring(0,500));
+		Document doc = Jsoup.parse(res);
+
 		if(jsonOutput) {
 			jsonOut("taskRunning",url);
 		}else{
