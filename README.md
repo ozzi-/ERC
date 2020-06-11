@@ -1,3 +1,6 @@
+![build status](https://api.travis-ci.com/ozzi-/ERC.svg?branch=master)
+![open issues](https://img.shields.io/github/issues/ozzi-/erc.svg)
+
 # External Resource Checker
 ECR will check a given URL for external resources by performing static analysis. 
 
