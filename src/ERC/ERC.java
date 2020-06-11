@@ -10,7 +10,7 @@ public class ERC {
 	public static void main(String[] args) throws MalformedURLException {				
 		StringBuilder jsonOutputB = new StringBuilder().append("{");
 		Settings settings = Settings.parseArgs(args);
-		ArrayList<String> secondLevelDomains = URLHelpers.getPublicSuffixList(settings.isSecondlevel(),settings.getProxyObj());
+		ArrayList<String> secondLevelDomains = URLHelpers.getPublicSuffixList(settings.isSecondlevel(),settings.getProxyObj(), settings.isDebug() && !settings.isJsonOutput());
 		
 		try {
 			doCheck(URLHelpers.addProtcol(settings.getUrl()),secondLevelDomains, jsonOutputB,settings);

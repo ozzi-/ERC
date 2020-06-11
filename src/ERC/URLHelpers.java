@@ -61,23 +61,27 @@ public class URLHelpers {
 		return false;
 	}
 	
-	public static ArrayList<String> getPublicSuffixList(boolean loadFromPublicSufficOrg, Proxy proxy) {
+	public static ArrayList<String> getPublicSuffixList(boolean loadFromPublicSufficOrg, Proxy proxy, boolean debug) {
 		ArrayList<String> secondLevelDomains = new ArrayList<String>();
-		if(!loadFromPublicSufficOrg) {
-			secondLevelDomains.add("co.uk");secondLevelDomains.add("co.at");secondLevelDomains.add("or.at");secondLevelDomains.add("ac.at");secondLevelDomains.add("gv.at");secondLevelDomains.add("ac.at");secondLevelDomains.add("ac.uk");secondLevelDomains.add("gov.uk");secondLevelDomains.add("ltd.uk");secondLevelDomains.add("fed.us");secondLevelDomains.add("isa.us");secondLevelDomains.add("nsn.us");secondLevelDomains.add("dni.us");secondLevelDomains.add("ac.ru");secondLevelDomains.add("com.ru");secondLevelDomains.add("edu.ru");secondLevelDomains.add("gov.ru");secondLevelDomains.add("int.ru");secondLevelDomains.add("mil.ru");secondLevelDomains.add("net.ru");secondLevelDomains.add("org.ru");secondLevelDomains.add("pp.ru");secondLevelDomains.add("com.au");secondLevelDomains.add("net.au");secondLevelDomains.add("org.au");secondLevelDomains.add("edu.au");secondLevelDomains.add("gov.au");
-		}
-		try {
-			String a = URLHelpers.getHTTP("https://publicsuffix.org/list/public_suffix_list.dat", false, true, proxy);
-			Scanner scanner = new Scanner(a);
-			while (scanner.hasNextLine()) {
-			  String line = scanner.nextLine();
-			  if(!line.startsWith("//") && !line.startsWith("*") && line.contains(".")) {
-				  secondLevelDomains.add(line);
-			  }
+		if(loadFromPublicSufficOrg) {
+			try {
+				String a = URLHelpers.getHTTP("https://publicsuffix.org/list/public_suffix_list.dat", false, true, proxy);
+				Scanner scanner = new Scanner(a);
+				while (scanner.hasNextLine()) {
+					String line = scanner.nextLine();
+					if(!line.startsWith("//") && !line.startsWith("*") && line.contains(".")) {
+						secondLevelDomains.add(line);
+					}
+				}
+				scanner.close();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			scanner.close();
-		} catch (Exception e) {
-			e.printStackTrace();
+			if(debug) {
+				System.out.println("-- Loaded "+secondLevelDomains.size()+" second level domains");
+			}
+		}else {			
+			secondLevelDomains.add("co.uk");secondLevelDomains.add("co.at");secondLevelDomains.add("or.at");secondLevelDomains.add("ac.at");secondLevelDomains.add("gv.at");secondLevelDomains.add("ac.at");secondLevelDomains.add("ac.uk");secondLevelDomains.add("gov.uk");secondLevelDomains.add("ltd.uk");secondLevelDomains.add("fed.us");secondLevelDomains.add("isa.us");secondLevelDomains.add("nsn.us");secondLevelDomains.add("dni.us");secondLevelDomains.add("ac.ru");secondLevelDomains.add("com.ru");secondLevelDomains.add("edu.ru");secondLevelDomains.add("gov.ru");secondLevelDomains.add("int.ru");secondLevelDomains.add("mil.ru");secondLevelDomains.add("net.ru");secondLevelDomains.add("org.ru");secondLevelDomains.add("pp.ru");secondLevelDomains.add("com.au");secondLevelDomains.add("net.au");secondLevelDomains.add("org.au");secondLevelDomains.add("edu.au");secondLevelDomains.add("gov.au");
 		}
 		return secondLevelDomains;
 	}
@@ -169,10 +173,12 @@ public class URLHelpers {
 			StringBuffer html = new StringBuffer();
 
 			while ((inputLine = in.readLine()) != null) {
-				html.append(inputLine);
+				html.append(inputLine+"\n");
 			}
 			in.close();
 			return html.toString();
+		} catch (java.net.UnknownHostException e) {
+			Error.errors.add("Unknown host '"+url+"': "+e.getMessage());
 		} catch (java.io.FileNotFoundException e) {
 			Error.errors.add("Could not find (404) '"+url+"': "+e.getMessage());
 		} catch (java.net.ConnectException e){
