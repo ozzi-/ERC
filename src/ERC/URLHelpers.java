@@ -11,12 +11,14 @@ import java.util.regex.Pattern;
 
 public class URLHelpers {
 	
-	// adds protocol if missing and appends path to domain name
-	public static String makeURLComplete(String domainName, String path) {
-		if(!domainName.startsWith("//")) {
-			domainName = addProtcol(domainName);			
+	public static String expandComplete(String domainName, String href) {
+		if (href.toLowerCase().startsWith("//")) {
+			href = addProtcol(href);
+		// we have a href that is relative
+		} else if (!href.toLowerCase().startsWith("http")) {
+			href = domainName + (domainName.endsWith("/") ? "" : "/") + href;
 		}
-		return domainName + (domainName.endsWith("/") || path.length()==0 ? "" : "/") + (path.startsWith("/")?path.substring(1):path);
+		return href;
 	}
 	
 	// adds protocol to URL if missing
@@ -65,11 +67,11 @@ public class URLHelpers {
 		return false;
 	}
 	
-	public static ArrayList<String> getPublicSuffixList(boolean loadFromPublicSufficOrg, Proxy proxy, boolean debug) {
+	public static ArrayList<String> getPublicSuffixList(boolean loadFromPublicSufficOrg, Proxy proxy, boolean debug, String userAgent) {
 		ArrayList<String> secondLevelDomains = new ArrayList<String>();
 		if(loadFromPublicSufficOrg) {
 			try {
-				String a = URLHelpers.getHTTP("https://publicsuffix.org/list/public_suffix_list.dat", false, true, proxy);
+				String a = URLHelpers.getHTTP("https://publicsuffix.org/list/public_suffix_list.dat", false, true, proxy, userAgent);
 				Scanner scanner = new Scanner(a);
 				while (scanner.hasNextLine()) {
 					String line = scanner.nextLine();
@@ -138,7 +140,7 @@ public class URLHelpers {
 		return protocol+urlDomain+path;
 	}
 
-	public static String getHTTP(String url, boolean isJsonOutput, boolean isQuiet, Proxy proxy) throws Exception {
+	public static String getHTTP(String url, boolean isJsonOutput, boolean isQuiet, Proxy proxy, String userAgent) throws Exception {
 		if (!isQuiet) {
 			if (!isJsonOutput) {
 				System.out.print("-- HTTP GET '" + url+"'");
@@ -153,7 +155,7 @@ public class URLHelpers {
 			conn = (HttpURLConnection) obj.openConnection();
 		}
 		conn.setReadTimeout(7000);
-        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36 - https://github.com/ozzi-/ERC");
+        conn.setRequestProperty("User-Agent", userAgent);
 		int status = 0;
 		try {
 			status = conn.getResponseCode();

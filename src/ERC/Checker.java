@@ -48,9 +48,9 @@ public class Checker {
 			String cssHref = element.attr("href").toLowerCase();
 			String rel = element.attr("rel").toLowerCase();
 			if (rel.equals("stylesheet") || cssHref.endsWith("css")) {
-				try {
-					cssHref = URLHelpers.makeURLComplete(baseURL, cssHref);
-					String res = URLHelpers.getHTTP(URLHelpers.addProtcol(cssHref),settings.isJsonOutput(),settings.isQuiet(), settings.getProxyObj());
+				try { 
+					cssHref = URLHelpers.expandComplete(baseURL, cssHref);
+					String res = URLHelpers.getHTTP(URLHelpers.addProtcol(cssHref),settings.isJsonOutput(),settings.isQuiet(), settings.getProxyObj(),settings.getUserAgent());
 					checkForExternalCSSinExternalFile(baseURL, res, false, settings.isJsonOutput());
 				} catch (Exception e) {
 					if(settings.isJsonOutput()) {
@@ -91,8 +91,8 @@ public class Checker {
 			} else {
 				String jsHref = element.attr("src").toLowerCase();
 				try {
-					jsHref = URLHelpers.makeURLComplete(baseURL, jsHref);
-					String res = URLHelpers.getHTTP(URLHelpers.addProtcol(jsHref),settings.isJsonOutput(),settings.isQuiet(),settings.getProxyObj());
+					jsHref = URLHelpers.expandComplete(baseURL, jsHref);
+					String res = URLHelpers.getHTTP(URLHelpers.addProtcol(jsHref),settings.isJsonOutput(),settings.isQuiet(),settings.getProxyObj(),settings.getUserAgent());
 					checkForExternalXHRJSinExternalFile(baseURL, res, false, settings.isJsonOutput());
 				} catch (Exception e) {
 					if(settings.isJsonOutput()) {

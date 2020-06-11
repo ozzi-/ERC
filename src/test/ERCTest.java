@@ -11,14 +11,14 @@ import ERC.Finding;
 import ERC.Settings;
 import ERC.URLHelpers;
 
-class ERCTests {
+class ERCTest {
 
 	@Test
 	void e2e() throws Exception {
 		StringBuilder jsonOutputB = new StringBuilder().append("{");
-		Settings settings = new Settings("-", "", true, true, true, true, false, true);
+		Settings settings = new Settings("-", "", "testagent",true, true, true, true, false, true);
 		
-		ArrayList<String> secondLevelDomains = URLHelpers.getPublicSuffixList(false,null, true);
+		ArrayList<String> secondLevelDomains = URLHelpers.getPublicSuffixList(false,null, true, "testagent");
 		ERC.ERC.doCheck("https://gist.github.com/ozzi-/eccdc84cb352c6df628bbaef06b83e8c", secondLevelDomains, jsonOutputB, settings);
 		
 		for (Finding finding : Finding.findings) {

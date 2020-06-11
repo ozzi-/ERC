@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import ERC.URLHelpers;
 
-class urlTests {
+class urlTest {
 
 	@Test
 	void removeSubdomain1() {
@@ -74,45 +74,7 @@ class urlTests {
 		assertEquals("https:"+url, urlWithProtocol);
 	}
 	
-	@Test
-	void makeURLComplete1() {
-		String url = "//github.com";
-		String path = "index.html?par=val";
-		String res = URLHelpers.makeURLComplete(url,path);
-		assertEquals("//github.com/index.html?par=val", res);
-	}
-	
-	@Test
-	void makeURLComplete2() {
-		String url = "github.com";
-		String path = "index.html?par=val";
-		String res = URLHelpers.makeURLComplete(url,path);
-		assertEquals("https://github.com/index.html?par=val", res);
-	}
-	
-	@Test
-	void makeURLComplete3() {
-		String url = "http://github.com";
-		String path = "index.html?par=val";
-		String res = URLHelpers.makeURLComplete(url,path);
-		assertEquals("http://github.com/index.html?par=val", res);
-	}
-	
-	@Test
-	void makeURLComplete4() {
-		String url = "http://github.com/";
-		String path = "";
-		String res = URLHelpers.makeURLComplete(url,path);
-		assertEquals("http://github.com/", res);
-	}
-	
-	@Test
-	void makeURLComplete5() {
-		String url = "http://github.com";
-		String path = "";
-		String res = URLHelpers.makeURLComplete(url,path);
-		assertEquals("http://github.com", res);
-	}
+
 	
 	@Test
 	void removePath1() {

@@ -20,9 +20,13 @@ public class Settings {
 	private boolean exitCode;
 	private boolean secondlevel;
 	private boolean debug;
+	private String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36 - https://github.com/ozzi-/ERC";
 	
-	public Settings(String url, String proxyString, boolean jsonOutput, boolean quiet, boolean strict, boolean exitCode, boolean secondlevel, boolean debug) {
+	public Settings(String url, String proxyString, String userAgent, boolean jsonOutput, boolean quiet, boolean strict, boolean exitCode, boolean secondlevel, boolean debug) {
 		this.setUrl(url);
+		if(userAgent!=null) {
+			this.setUserAgent(userAgent);
+		}
 		this.setProxyString("");
 		if(proxyString!=null) {
 			this.setProxyString(proxyString);			
@@ -41,6 +45,9 @@ public class Settings {
 		Option input = new Option("u", "url", true, "URL to scan for external content");
 		input.setRequired(true);
 		options.addOption(input);
+		
+		Option agent = new Option("a", "useragent", true, "Send custom user agent");
+		options.addOption(agent);
 
 		Option suffix = new Option("j", "json", false, "output results as JSON");
 		options.addOption(suffix);
@@ -76,13 +83,14 @@ public class Settings {
 		
 		String url = cmd.getOptionValue("url");
 		String proxyString = cmd.getOptionValue("proxy");
+		String agentVal = cmd.getOptionValue("useragent");
 		boolean jsonOutput = cmd.hasOption("json");
 		boolean quietVal = cmd.hasOption("quiet");
 		boolean strictVal = cmd.hasOption("strict");
 		boolean exitCodeVal = cmd.hasOption("exitcode");
 		boolean secondlevelVal = cmd.hasOption("secondlevel");
 		boolean debugVal = cmd.hasOption("debug");
-		return new Settings(url,proxyString,jsonOutput,quietVal,strictVal,exitCodeVal,secondlevelVal,debugVal);
+		return new Settings(url,proxyString,agentVal,jsonOutput,quietVal,strictVal,exitCodeVal,secondlevelVal,debugVal);
 	}
 
 	public String getUrl() {
@@ -160,5 +168,13 @@ public class Settings {
 
 	public void setSecondlevel(boolean secondlevel) {
 		this.secondlevel = secondlevel;
+	}
+
+	public String getUserAgent() {
+		return userAgent;
+	}
+
+	public void setUserAgent(String userAgent) {
+		this.userAgent = userAgent;
 	}
 }

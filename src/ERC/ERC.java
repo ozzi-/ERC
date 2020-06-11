@@ -10,7 +10,7 @@ public class ERC {
 	public static void main(String[] args) throws MalformedURLException {				
 		StringBuilder jsonOutputB = new StringBuilder().append("{");
 		Settings settings = Settings.parseArgs(args);
-		ArrayList<String> secondLevelDomains = URLHelpers.getPublicSuffixList(settings.isSecondlevel(),settings.getProxyObj(), settings.isDebug() && !settings.isJsonOutput());
+		ArrayList<String> secondLevelDomains = URLHelpers.getPublicSuffixList(settings.isSecondlevel(),settings.getProxyObj(), settings.isDebug() && !settings.isJsonOutput(),settings.getUserAgent());
 		
 		try {
 			doCheck(URLHelpers.addProtcol(settings.getUrl()),secondLevelDomains, jsonOutputB,settings);
@@ -20,10 +20,10 @@ public class ERC {
 		ERCHelper.processResults(jsonOutputB, Finding.findings, Error.errors, settings);
 		ERCHelper.handleExitCode(Finding.findings, settings);
 	}
-		
+
 	public static void doCheck(String url, ArrayList<String> sld, StringBuilder jsonOutputB, Settings settings) throws Exception {
 		String cleanURL = GR.clean(url).getSt();
-		String res = URLHelpers.getHTTP(url, false, true, settings.getProxyObj());
+		String res = URLHelpers.getHTTP(url, false, true, settings.getProxyObj(),settings.getUserAgent());
 		ERCHelper.runInfo(url, jsonOutputB, settings, res);
 		Document doc = Jsoup.parse(res);
 
