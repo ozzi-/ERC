@@ -1,4 +1,4 @@
-![build status](https://api.travis-ci.com/ozzi-/ERC.svg?branch=master)
+![build status](https://api.travis-ci.com/ozzi-/ECR.svg?branch=master)
 ![open issues](https://img.shields.io/github/issues/ozzi-/erc.svg)
 
 # External Resource Checker
