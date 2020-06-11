@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,7 +13,7 @@ public class Checker {
 	// (xhr.)open("POST","http..
 	private static Pattern jsXHRPattern = Pattern.compile("open(\\s)?\\((\\s)?(\\\"|')[a-zA-Z]*(\\\"|')(\\s)?,(\\s)?(\\\"|')([^;]*)(\\\"|')");
 	
-	static void checkForExternals(String baseURL, Document doc, String tag, String attribute, boolean jsonOutput, boolean strictVal, boolean quietVal) {
+	static void checkForExternals(String baseURL, Document doc, String tag, String attribute, ArrayList<String> sld, boolean jsonOutput, boolean strictVal, boolean quietVal) {
 		Elements elements = doc.select(tag);
 		for (Element element : elements) {
 			String attribValue = element.attr(attribute);
@@ -22,7 +23,7 @@ public class Checker {
 			checkForExternalResourceCSS(baseURL, tag, element, cleanHref, jsonOutput, quietVal);
 			// string might be empty in case of inline JS, where there is no src attribute
 			if (!cleanHref.equals("")) {
-				if (URLHelpers.isExternal(baseURL, gr, strictVal)) {
+				if (URLHelpers.isExternal(baseURL, gr, strictVal,sld)) {
 					if(jsonOutput) {
 						ERC.findings.add(new Touple(tag,cleanHref));
 					}else {

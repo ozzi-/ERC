@@ -9,7 +9,11 @@ public class Strng {
 		}
 		return href;
 	}
-
+	
+	static String repeat(String strng, int amount) {
+		return String.format("%0" + amount + "d", 0).replace("0", strng);
+	}
+	
 	static int nthLastIndexOf(int nth, String ch, String string) {
 		if (nth <= 0) {
 			return string.length();

@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 
@@ -23,10 +22,10 @@ public class ERC {
 	private static StringBuilder jsonOutputB = new StringBuilder();
 	private static boolean strictVal;
 	private static boolean exitCodeVal;
+	private static boolean secondlevelVal;
+	private static boolean debugVal;
 
-	public static void main(String[] args) throws MalformedURLException {
-		
-
+	public static void main(String[] args) throws MalformedURLException {				
 		jsonOutputB.append("{");
 		
 		CommandLine cmd = parseArgs(args);
@@ -35,17 +34,13 @@ public class ERC {
 		quietVal = cmd.hasOption("quiet");
 		strictVal = cmd.hasOption("strict");
 		exitCodeVal = cmd.hasOption("exitcode");
-				
+		secondlevelVal = cmd.hasOption("secondlevel");
+		debugVal = cmd.hasOption("debug");
+		
+		ArrayList<String>sLD = URLHelpers.getPublicSuffixList(secondlevelVal);			
 		// TODO UNIT TESTS
 		try {
-			doCheck(URLHelpers.addProtcol(url));
-		} catch (javax.net.ssl.SSLHandshakeException e) {
-			// https://stackoverflow.com/questions/23777817/redirect-to-url-that-doesnot-have-www-by-jsoup
-			try {
-				doCheck(URLHelpers.addProtcol("www."+url));
-			} catch (Exception e2) {
-				e2.printStackTrace();
-			}
+			doCheck(URLHelpers.addProtcol(url),sLD,debugVal);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -67,6 +62,9 @@ public class ERC {
 			jsonOutputB.append("}");
 			System.out.println(jsonOutputB.toString());
 		}else{
+			for (String error : errors) {
+				System.out.println("!- "+error);
+			}
 			System.out.println("\r\nDone.");
 		}
 		if(exitCodeVal) {
@@ -93,6 +91,12 @@ public class ERC {
 		
 		Option strict = new Option("s", "strict", false, "consider subdomains as external content");
 		options.addOption(strict);
+		
+		Option secondLevel = new Option("l", "secondlevel", false, "download second level domain list");
+		options.addOption(secondLevel);
+		
+		Option debug = new Option("d", "debug", false, "output first 1000 characters of the response received");
+		options.addOption(debug);
 	
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
@@ -101,34 +105,37 @@ public class ERC {
 			cmd = parser.parse(options, args);
 		} catch (ParseException e) {
 			System.out.println(e.getMessage());
-			formatter.printHelp("java -jar erc.jar", options);
+			formatter.printHelp("java -jar ERC.jar", options);
 			System.exit(1);
 		}
 		return cmd;
 	}
-	
-	// 	TODO proxy support
-	// TODO user agent?
-	private static void doCheck(String url) throws Exception {
+		
+	private static void doCheck(String url, ArrayList<String> sld, boolean debugVal) throws Exception {
 		String cleanURL = GR.clean(url).getSt();
 		String res = URLHelpers.getHTTP(url, false, true);
-		System.out.println("RESULT:"+res.substring(0,500));
-		Document doc = Jsoup.parse(res);
-
 		if(jsonOutput) {
 			jsonOut("taskRunning",url);
 		}else{
-			System.out.println("ERC running running for - "+url+"\r\n***************************************************");			
+			String header ="ERC running running for - "+url+" ("+res.length()+")";
+			System.out.print(header+"\r\n");
+			System.out.print(Strng.repeat("*", header.length())+"\r\n");			
+			if(debugVal) {
+				int maxLength = res.length()<1000?res.length():1000;
+				System.out.println("Debug Output:"+res.substring(0,maxLength));
+			}
 		}
-		Checker.checkForExternals(cleanURL, doc, "link", "href", jsonOutput, strictVal, quietVal);
-		Checker.checkForExternals(cleanURL, doc, "script", "src", jsonOutput, strictVal, quietVal);
-		Checker.checkForExternals(cleanURL, doc, "iframe", "src", jsonOutput, strictVal, quietVal);
-		Checker.checkForExternals(cleanURL, doc, "object", "data", jsonOutput, strictVal, quietVal);
-		Checker.checkForExternals(cleanURL, doc, "style", "inv", jsonOutput, strictVal, quietVal);
-		Checker.checkForExternals(cleanURL, doc, "img", "src", jsonOutput, strictVal, quietVal);
-		Checker.checkForExternals(cleanURL, doc, "embed", "src", jsonOutput, strictVal, quietVal);
-		Checker.checkForExternals(cleanURL, doc, "source", "src", jsonOutput, strictVal, quietVal);
-		Checker.checkForExternals(cleanURL, doc, "track", "src", jsonOutput, strictVal, quietVal);
+		Document doc = Jsoup.parse(res);
+
+		Checker.checkForExternals(cleanURL, doc, "link", "href", sld, jsonOutput, strictVal, quietVal);
+		Checker.checkForExternals(cleanURL, doc, "script", "src", sld, jsonOutput, strictVal, quietVal);
+		Checker.checkForExternals(cleanURL, doc, "iframe", "src", sld, jsonOutput, strictVal, quietVal);
+		Checker.checkForExternals(cleanURL, doc, "object", "data", sld, jsonOutput, strictVal, quietVal);
+		Checker.checkForExternals(cleanURL, doc, "style", "inv", sld, jsonOutput, strictVal, quietVal);
+		Checker.checkForExternals(cleanURL, doc, "img", "src", sld, jsonOutput, strictVal, quietVal);
+		Checker.checkForExternals(cleanURL, doc, "embed", "src", sld, jsonOutput, strictVal, quietVal);
+		Checker.checkForExternals(cleanURL, doc, "source", "src", sld, jsonOutput, strictVal, quietVal);
+		Checker.checkForExternals(cleanURL, doc, "track", "src", sld, jsonOutput, strictVal, quietVal);
 	}
 
 	private static void jsonOut(String key, String value) {
