@@ -9,6 +9,49 @@ import org.junit.jupiter.api.Test;
 import ERC.URLHelpers;
 
 class urlTest {
+	
+	@Test
+	void expandComplete1() {
+		String expand = URLHelpers.expandComplete("www.github.com","resource"); 
+		assertEquals("www.github.com/resource", expand);
+	}
+	
+	@Test
+	void expandComplete2() {
+		String expand = URLHelpers.expandComplete("www.github.com/","resource"); 
+		assertEquals("www.github.com/resource", expand);
+	}
+	
+	@Test
+	void expandComplete3() {
+		String expand = URLHelpers.expandComplete("www.github.com","/resource"); 
+		assertEquals("www.github.com/resource", expand);
+	}
+	
+	@Test
+	void expandComplete4() {
+		String expand = URLHelpers.expandComplete("www.github.com","http://gist.github.com"); 
+		assertEquals("http://gist.github.com", expand);
+	}
+	
+	@Test
+	void expandComplete5() {
+		String expand = URLHelpers.expandComplete("www.github.com","https://gist.github.com"); 
+		assertEquals("https://gist.github.com", expand);
+	}
+	
+	@Test
+	void expandComplete6() {
+		String expand = URLHelpers.expandComplete("//github.com","https://gist.github.com"); 
+		assertEquals("https://gist.github.com", expand);
+	}
+	
+	@Test
+	void expandComplete7() {
+		String expand = URLHelpers.expandComplete("www.github.com","//gist.github.com"); 
+		assertEquals("https://gist.github.com", expand);
+	}
+
 
 	@Test
 	void removeSubdomain1() {

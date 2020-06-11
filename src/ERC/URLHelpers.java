@@ -13,12 +13,15 @@ public class URLHelpers {
 	
 	public static String expandComplete(String domainName, String href) {
 		if (href.toLowerCase().startsWith("//")) {
-			href = addProtcol(href);
-		// we have a href that is relative
-		} else if (!href.toLowerCase().startsWith("http")) {
-			href = domainName + (domainName.endsWith("/") ? "" : "/") + href;
+			return addProtcol(href);
 		}
-		return href;
+		if (href.toLowerCase().startsWith("http")) {
+			return href;
+		}
+		if(href.startsWith("/")) {
+			href=href.substring(1);
+		}
+		return domainName + (domainName.endsWith("/") ? "" : "/") + href;
 	}
 	
 	// adds protocol to URL if missing
