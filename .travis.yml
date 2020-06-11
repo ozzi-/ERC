@@ -1,0 +1,12 @@
+language: java
+
+sudo: false
+
+dist: bionic
+
+jdk:
+  - openjdk8
+
+branches:
+  only:
+    - master
