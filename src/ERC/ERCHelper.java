@@ -10,7 +10,7 @@ public class ERCHelper {
 		}
 	}
 	
-	static void processResults(StringBuilder output, ArrayList<Finding> findings, ArrayList<String> errors, Settings settings) {
+	public static void processResults(StringBuilder output, ArrayList<Finding> findings, ArrayList<String> errors, Settings settings) {
 		if(settings.isJsonOutput()) {
 			output.append("\"findings\": [");
 			for (Finding touple : findings) {

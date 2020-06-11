@@ -13,12 +13,10 @@ public class URLHelpers {
 	
 	// adds protocol if missing and appends path to domain name
 	public static String makeURLComplete(String domainName, String path) {
-		if (path.toLowerCase().startsWith("//")) {
-			path = addProtcol(path);
-		} else if (!path.toLowerCase().startsWith("http")) {
-			path = domainName + (domainName.endsWith("/") ? "" : "/") + path;
+		if(!domainName.startsWith("//")) {
+			domainName = addProtcol(domainName);			
 		}
-		return path;
+		return domainName + (domainName.endsWith("/") || path.length()==0 ? "" : "/") + (path.startsWith("/")?path.substring(1):path);
 	}
 	
 	// adds protocol to URL if missing
@@ -33,8 +31,14 @@ public class URLHelpers {
 	}
 
 	public static String removePath(String baseURL) {
-		baseURL = baseURL.contains("/") ? baseURL.substring(0, baseURL.indexOf("/")) : baseURL;
-		return baseURL;
+		String protocol = getProtocol(baseURL);
+		if(protocol.equals("")) {
+			return baseURL.contains("/") ? baseURL.substring(0, baseURL.indexOf("/")) : baseURL;
+		}else {
+			String urlNoProtocol = baseURL.substring(protocol.length());
+			urlNoProtocol = urlNoProtocol.contains("/") ? urlNoProtocol.substring(0, urlNoProtocol.indexOf("/")) : urlNoProtocol;
+			return protocol+urlNoProtocol;
+		}
 	}
 	
 	static boolean isExternal(String baseURL, GR gr, boolean strict, ArrayList<String> secondLevelDomains) {
@@ -148,7 +152,7 @@ public class URLHelpers {
 		}else {
 			conn = (HttpURLConnection) obj.openConnection();
 		}
-		conn.setReadTimeout(5000);
+		conn.setReadTimeout(7000);
         conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36 - https://github.com/ozzi-/ERC");
 		int status = 0;
 		try {

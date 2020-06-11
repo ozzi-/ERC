@@ -21,7 +21,7 @@ public class ERC {
 		ERCHelper.handleExitCode(Finding.findings, settings);
 	}
 		
-	private static void doCheck(String url, ArrayList<String> sld, StringBuilder jsonOutputB, Settings settings) throws Exception {
+	public static void doCheck(String url, ArrayList<String> sld, StringBuilder jsonOutputB, Settings settings) throws Exception {
 		String cleanURL = GR.clean(url).getSt();
 		String res = URLHelpers.getHTTP(url, false, true, settings.getProxyObj());
 		ERCHelper.runInfo(url, jsonOutputB, settings, res);
