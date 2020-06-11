@@ -1,3 +1,4 @@
+package ERC;
 import java.util.ArrayList;
 
 public class GR {
@@ -32,7 +33,7 @@ public class GR {
 		starts.add("http://");
 		starts.add("//");
 		starts.add("www.");
-		String cleaned = Strng.removeIfStartsWith(src, starts);
+		String cleaned = StringHelper.removeIfStartsWith(src, starts);
 		boolean changed = cleaned.length() != src.length();
 		return new GR(cleaned, changed);
 	}

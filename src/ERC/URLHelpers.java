@@ -1,7 +1,7 @@
+package ERC;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
 import java.util.ArrayList;
@@ -61,13 +61,13 @@ public class URLHelpers {
 		return false;
 	}
 	
-	public static ArrayList<String> getPublicSuffixList(boolean loadFromPublicSufficOrg) {
+	public static ArrayList<String> getPublicSuffixList(boolean loadFromPublicSufficOrg, Proxy proxy) {
 		ArrayList<String> secondLevelDomains = new ArrayList<String>();
 		if(!loadFromPublicSufficOrg) {
 			secondLevelDomains.add("co.uk");secondLevelDomains.add("co.at");secondLevelDomains.add("or.at");secondLevelDomains.add("ac.at");secondLevelDomains.add("gv.at");secondLevelDomains.add("ac.at");secondLevelDomains.add("ac.uk");secondLevelDomains.add("gov.uk");secondLevelDomains.add("ltd.uk");secondLevelDomains.add("fed.us");secondLevelDomains.add("isa.us");secondLevelDomains.add("nsn.us");secondLevelDomains.add("dni.us");secondLevelDomains.add("ac.ru");secondLevelDomains.add("com.ru");secondLevelDomains.add("edu.ru");secondLevelDomains.add("gov.ru");secondLevelDomains.add("int.ru");secondLevelDomains.add("mil.ru");secondLevelDomains.add("net.ru");secondLevelDomains.add("org.ru");secondLevelDomains.add("pp.ru");secondLevelDomains.add("com.au");secondLevelDomains.add("net.au");secondLevelDomains.add("org.au");secondLevelDomains.add("edu.au");secondLevelDomains.add("gov.au");
 		}
 		try {
-			String a = URLHelpers.getHTTP("https://publicsuffix.org/list/public_suffix_list.dat", false, true);
+			String a = URLHelpers.getHTTP("https://publicsuffix.org/list/public_suffix_list.dat", false, true, proxy);
 			Scanner scanner = new Scanner(a);
 			while (scanner.hasNextLine()) {
 			  String line = scanner.nextLine();
@@ -104,7 +104,7 @@ public class URLHelpers {
 			urlDomain=urlDomain.substring(0, slashPos);
 		}
 		// Done, now let us count the dots . . 
-		int dotCount = Strng.countOccurrences(urlDomain, ".");
+		int dotCount = StringHelper.countOccurrences(urlDomain, ".");
 		// example.com <-- nothing to cut
 		if(dotCount==1){
 			return protocol+url;
@@ -116,7 +116,7 @@ public class URLHelpers {
 			// example: something.co.uk we don't want to cut away "something", since it isn't a subdomain, but the actual domain
 			if(urlDomain.endsWith(secondLevelDomain)) {
 				// we increase the dot offset with the amount of dots in the second level domain (co.uk = +1)
-				dotOffset += Strng.countOccurrences(secondLevelDomain, ".");
+				dotOffset += StringHelper.countOccurrences(secondLevelDomain, ".");
 				break;
 			}
 		}
@@ -125,29 +125,32 @@ public class URLHelpers {
 			return protocol+urlDomain+path;
 		}
 		// if we have sub.something.co.uk, we have a offset of 3 and 3 dots, so we remove "sub"
-		int pos = Strng.nthLastIndexOf(dotOffset, ".", urlDomain)+1;
+		int pos = StringHelper.nthLastIndexOf(dotOffset, ".", urlDomain)+1;
 		urlDomain = urlDomain.substring(pos);	
 		return protocol+urlDomain+path;
 	}
 
-	public static String getHTTP(String url, boolean jsonOutput, boolean quietVal) throws Exception {
-		if (!quietVal) {
-			if (!jsonOutput) {
+	public static String getHTTP(String url, boolean isJsonOutput, boolean isQuiet, Proxy proxy) throws Exception {
+		if (!isQuiet) {
+			if (!isJsonOutput) {
 				System.out.print("-- HTTP GET '" + url+"'");
 			}
 		}
-		
-		Proxy webProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", 5016));
-		
+			
 		URL obj = new URL(url);
-		HttpURLConnection conn = (HttpURLConnection) obj.openConnection(webProxy);
+		HttpURLConnection conn;
+		if(proxy!=null) {
+			conn = (HttpURLConnection) obj.openConnection(proxy);			
+		}else {
+			conn = (HttpURLConnection) obj.openConnection();
+		}
 		conn.setReadTimeout(5000);
-        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36 - https://github.com/ozzi-/ECR");
+        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36 - https://github.com/ozzi-/ERC");
 		int status = 0;
 		try {
 			status = conn.getResponseCode();
-			if (!quietVal) {
-				if (!jsonOutput) {
+			if (!isQuiet) {
+				if (!isJsonOutput) {
 					System.out.print(" -> got response code = " + status + "\r\n");
 				}
 			}
@@ -156,7 +159,7 @@ public class URLHelpers {
 					String newUrl = conn.getHeaderField("Location");
 					conn = (HttpURLConnection) new URL(newUrl).openConnection();
 				}else {
-					ERC.errors.add("Error doing HTTP GET for '"+url+"': got response code "+status);
+					Error.errors.add("Error doing HTTP GET for '"+url+"': got response code "+status);
 					return "";
 				}
 			}
@@ -171,9 +174,9 @@ public class URLHelpers {
 			in.close();
 			return html.toString();
 		} catch (java.io.FileNotFoundException e) {
-			ERC.errors.add("Could not find (404) '"+url+"': "+e.getMessage());
+			Error.errors.add("Could not find (404) '"+url+"': "+e.getMessage());
 		} catch (java.net.ConnectException e){
-			ERC.errors.add("Error doing HTTP GET for '"+url+"': "+e.getMessage());
+			Error.errors.add("Error doing HTTP GET for '"+url+"': "+e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
