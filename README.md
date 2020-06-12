@@ -33,6 +33,8 @@ usage: java -jar ERC.jar
  -e,--exitcode      amount of findings will be returned as exit code
  -j,--json          output results as JSON
  -d,--debug         output first 1000 characters of the response received 
+ -cn,--cookiename   Defines the name of a cookie to be sent
+ -cv,--cookievalue  Defines the value of the cookie to be sent
 ```
 
 ### Strict mode
@@ -42,6 +44,11 @@ Using --strict will consider domain.com loading a resource from sub.domain.com t
 Since many top level domains exist, that consist of multiple "parts", such as co.uk, this results in problems when checking for external content. 
 ERC contains a list of the most common so called second level domains, this will prevent it from interpreting foo.co.uk and bar.co.uk as the same origin (co.uk).
 If you require the complete list, use the --secondlevel flag, it will download the current list (https://publicsuffix.org/list/public_suffix_list.dat).
+
+### Cookie Name / Value
+If you require a session cookie, use -cn and -cv.
+
+Note: The cookie header will be sent to the URL defined with -u.
 
 ## Example
 java -jar ERC.jar -u https://github.com -s -q
