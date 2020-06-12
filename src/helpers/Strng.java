@@ -19,11 +19,14 @@ public class Strng {
 		builder.append("\""+key+"\":"+"\""+value+"\",");
 	}
 	
-	public static int nthLastIndexOf(int nth, String ch, String string) {
-		if (nth <= 0) {
-			return string.length();
+	public static int nthLastIndexOf(int nth, String needle, String haystack) {
+		if(haystack==null || haystack.length()<needle.length()) {
+			return -1;
 		}
-		return nthLastIndexOf(--nth, ch, string.substring(0, string.lastIndexOf(ch)));
+		if (nth <= 0) {
+			return haystack.length();
+		}
+		return nthLastIndexOf(--nth, needle, haystack.substring(0, haystack.lastIndexOf(needle)));
 	}
 
 	public static int countOccurrences(String haystack, String needle) {

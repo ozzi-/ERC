@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import helpers.NW;
 
-class urlTest {
+class URLTest {
 	
 	@Test
 	void expandComplete1() {
