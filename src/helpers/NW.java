@@ -76,7 +76,7 @@ public class NW {
 		ArrayList<String> secondLevelDomains = new ArrayList<String>();
 		if(loadFromPublicSufficOrg) {
 			try {
-				String a = NW.getHTTP("https://publicsuffix.org/list/public_suffix_list.dat", false, true, proxy, userAgent);
+				String a = NW.getHTTP("https://publicsuffix.org/list/public_suffix_list.dat", false, true, proxy, userAgent, null);
 				Scanner scanner = new Scanner(a);
 				while (scanner.hasNextLine()) {
 					String line = scanner.nextLine();
@@ -145,7 +145,7 @@ public class NW {
 		return protocol+urlDomain+path;
 	}
 
-	public static String getHTTP(String url, boolean isJsonOutput, boolean isQuiet, Proxy proxy, String userAgent) throws Exception {
+	public static String getHTTP(String url, boolean isJsonOutput, boolean isQuiet, Proxy proxy, String userAgent, String cookie) throws Exception {
 		if (!isQuiet) {
 			if (!isJsonOutput) {
 				System.out.print("-- HTTP GET '" + url+"'");
@@ -160,6 +160,9 @@ public class NW {
 			conn = (HttpURLConnection) urlObj.openConnection();
 		}
 		conn.setReadTimeout(7000);
+		if(cookie!=null) {
+			conn.setRequestProperty("Cookie", cookie); 			
+		}
         conn.setRequestProperty("User-Agent", userAgent);
 		int status = 0;
 		try {

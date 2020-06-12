@@ -18,7 +18,7 @@ public class ExternalResourceChecker {
 	
 	public static void check(String url, ArrayList<String> sld, StringBuilder jsonOutputB, Settings settings) throws Exception {
 		String cleanURL = CleanableURL.clean(url).getSt();
-		String res = NW.getHTTP(url, false, true, settings.getProxyObj(),settings.getUserAgent());
+		String res = NW.getHTTP(url, false, true, settings.getProxyObj(),settings.getUserAgent(),settings.getCookieFormatted());
 		ERCHelper.runInfo(url, jsonOutputB, settings, res);
 		Document doc = Jsoup.parse(res);
 
@@ -73,7 +73,8 @@ public class ExternalResourceChecker {
 			if (rel.equals("stylesheet") || cssHref.endsWith("css")) {
 				try { 
 					cssHref = NW.expandComplete(baseURL, cssHref);
-					String res = NW.getHTTP(NW.addProtcol(cssHref),settings.isJsonOutput(),settings.isQuiet(), settings.getProxyObj(),settings.getUserAgent());
+					// TODO send cookie if not external!
+					String res = NW.getHTTP(NW.addProtcol(cssHref),settings.isJsonOutput(),settings.isQuiet(), settings.getProxyObj(),settings.getUserAgent(),null);
 					checkForExternalCSSinExternalFile(baseURL, res, false, settings.isJsonOutput());
 				} catch (Exception e) {
 					if(settings.isJsonOutput()) {
@@ -114,7 +115,8 @@ public class ExternalResourceChecker {
 				String jsHref = element.attr("src").toLowerCase();
 				try {
 					jsHref = NW.expandComplete(baseURL, jsHref);
-					String res = NW.getHTTP(NW.addProtcol(jsHref),settings.isJsonOutput(),settings.isQuiet(),settings.getProxyObj(),settings.getUserAgent());
+					// TODO send cookie if not external
+					String res = NW.getHTTP(NW.addProtcol(jsHref),settings.isJsonOutput(),settings.isQuiet(),settings.getProxyObj(),settings.getUserAgent(),null);
 					checkForExternalXHRJSinExternalFile(baseURL, res, false, settings.isJsonOutput());
 				} catch (Exception e) {
 					if(settings.isJsonOutput()) {

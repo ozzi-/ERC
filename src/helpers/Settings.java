@@ -14,6 +14,8 @@ public class Settings {
 	
 	private String url;
 	private String proxyString;
+	private String cookieName;
+	private String cookieValue;
 	private boolean quiet;
 	private boolean strict;
 	private boolean jsonOutput;
@@ -22,7 +24,7 @@ public class Settings {
 	private boolean debug;
 	private String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36 - https://github.com/ozzi-/ERC";
 	
-	public Settings(String url, String proxyString, String userAgent, boolean jsonOutput, boolean quiet, boolean strict, boolean exitCode, boolean secondlevel, boolean debug) {
+	public Settings(String url, String proxyString, String userAgent, boolean jsonOutput, boolean quiet, boolean strict, boolean exitCode, boolean secondlevel, boolean debug, String cookieName, String cookieValue) {
 		this.setUrl(url);
 		if(userAgent!=null) {
 			this.setUserAgent(userAgent);
@@ -37,6 +39,8 @@ public class Settings {
 		this.setExitCode(exitCode);
 		this.setSecondlevel(secondlevel);
 		this.setDebug(debug);
+		this.setCookieName(cookieName);
+		this.setCookieValue(cookieValue);
 	}
 	
 	public static Settings parseArgs(String[] args) {
@@ -70,6 +74,13 @@ public class Settings {
 		Option debug = new Option("d", "debug", false, "output first 1000 characters of the response received");
 		options.addOption(debug);
 	
+		Option cookiename = new Option("cn", "cookiename", true, "Name of the cookie to send");
+		options.addOption(cookiename);
+
+		Option cookievalue = new Option("cv", "cookievalue", true, "Send custom user agent");
+		options.addOption(cookievalue);
+		
+
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
 		CommandLine cmd = null;
@@ -82,6 +93,8 @@ public class Settings {
 		}
 		
 		String url = cmd.getOptionValue("url");
+		String cookienameVal = cmd.getOptionValue("cookiename");
+		String cookievalueVal= cmd.getOptionValue("cookievalue");
 		String proxyString = cmd.getOptionValue("proxy");
 		String agentVal = cmd.getOptionValue("useragent");
 		boolean jsonOutput = cmd.hasOption("json");
@@ -90,9 +103,16 @@ public class Settings {
 		boolean exitCodeVal = cmd.hasOption("exitcode");
 		boolean secondlevelVal = cmd.hasOption("secondlevel");
 		boolean debugVal = cmd.hasOption("debug");
-		return new Settings(url,proxyString,agentVal,jsonOutput,quietVal,strictVal,exitCodeVal,secondlevelVal,debugVal);
+		return new Settings(url,proxyString,agentVal,jsonOutput,quietVal,strictVal,exitCodeVal,secondlevelVal,debugVal,cookienameVal,cookievalueVal);
 	}
 
+	public String getCookieFormatted() {
+		if(cookieName!=null && cookieValue!=null) {
+			return cookieName+"="+cookieValue;
+		}
+		return null;
+	}
+	
 	public String getUrl() {
 		return url;
 	}
@@ -176,5 +196,13 @@ public class Settings {
 
 	public void setUserAgent(String userAgent) {
 		this.userAgent = userAgent;
+	}
+
+	public void setCookieValue(String cookieValue) {
+		this.cookieValue = cookieValue;
+	}
+
+	public void setCookieName(String cookieName) {
+		this.cookieName = cookieName;
 	}
 }
