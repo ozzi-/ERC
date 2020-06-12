@@ -1,7 +1,7 @@
-package ERC;
+package helpers;
 import java.util.ArrayList;
 
-public class StringHelper {
+public class Strng {
 	public static String removeIfStartsWith(String href, ArrayList<String> starts) {
 		for (String start : starts) {
 			if (href.startsWith(start)) {
@@ -19,7 +19,7 @@ public class StringHelper {
 		builder.append("\""+key+"\":"+"\""+value+"\",");
 	}
 	
-	static int nthLastIndexOf(int nth, String ch, String string) {
+	public static int nthLastIndexOf(int nth, String ch, String string) {
 		if (nth <= 0) {
 			return string.length();
 		}

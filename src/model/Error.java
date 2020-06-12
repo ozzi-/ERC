@@ -1,4 +1,4 @@
-package ERC;
+package model;
 import java.util.ArrayList;
 
 public class Error {

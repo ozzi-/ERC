@@ -1,13 +1,37 @@
-package ERC;
+package erc;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class Checker {
+import helpers.NW;
+import helpers.Settings;
+import model.CleanableURL;
+import model.Error;
+import model.Finding;
+
+public class ExternalResourceChecker {
+	
+	public static void check(String url, ArrayList<String> sld, StringBuilder jsonOutputB, Settings settings) throws Exception {
+		String cleanURL = CleanableURL.clean(url).getSt();
+		String res = NW.getHTTP(url, false, true, settings.getProxyObj(),settings.getUserAgent());
+		ERCHelper.runInfo(url, jsonOutputB, settings, res);
+		Document doc = Jsoup.parse(res);
+
+		ExternalResourceChecker.checkForExternals(cleanURL, doc, "link", "href", sld, settings);
+		ExternalResourceChecker.checkForExternals(cleanURL, doc, "script", "src", sld, settings);
+		ExternalResourceChecker.checkForExternals(cleanURL, doc, "iframe", "src", sld, settings);
+		ExternalResourceChecker.checkForExternals(cleanURL, doc, "object", "data", sld, settings);
+		ExternalResourceChecker.checkForExternals(cleanURL, doc, "style", "inv", sld, settings);
+		ExternalResourceChecker.checkForExternals(cleanURL, doc, "img", "src", sld, settings);
+		ExternalResourceChecker.checkForExternals(cleanURL, doc, "embed", "src", sld, settings);
+		ExternalResourceChecker.checkForExternals(cleanURL, doc, "source", "src", sld, settings);
+		ExternalResourceChecker.checkForExternals(cleanURL, doc, "track", "src", sld, settings);
+	}
 
 	// (@import) url("http..
 	private static Pattern cssURLPattern = Pattern.compile("@import(\\s)?(\\\"|'|\\(|url)(\\\"|'|\\()*([^;]*)(\\\"|')");
@@ -18,16 +42,15 @@ public class Checker {
 		Elements elements = doc.select(tag);
 		for (Element element : elements) {
 			String attribValue = element.attr(attribute);
-			GR gr = GR.clean(attribValue);
+			CleanableURL gr = CleanableURL.clean(attribValue);
 			String cleanHref = gr.getSt();
 			checkForExternalXHRJS(baseURL, tag, element, cleanHref, settings);
 			checkForExternalResourceCSS(baseURL, tag, element, cleanHref, settings);
 			// string might be empty in case of inline JS, where there is no src attribute
 			if (!cleanHref.equals("")) {
-				if (URLHelpers.isExternal(baseURL, gr, settings.isStrict(),sld)) {
-					if(settings.isJsonOutput()) {
-						Finding.findings.add(new Finding(tag,cleanHref));
-					}else {
+				if (NW.isExternal(baseURL, gr, settings.isStrict(),sld)) {
+					Finding.findings.add(new Finding(tag,cleanHref));
+					if(!settings.isJsonOutput()) {
 						System.out.println("-> Found <" + tag + "> loading resource from " + cleanHref);						
 					}
 				}
@@ -49,8 +72,8 @@ public class Checker {
 			String rel = element.attr("rel").toLowerCase();
 			if (rel.equals("stylesheet") || cssHref.endsWith("css")) {
 				try { 
-					cssHref = URLHelpers.expandComplete(baseURL, cssHref);
-					String res = URLHelpers.getHTTP(URLHelpers.addProtcol(cssHref),settings.isJsonOutput(),settings.isQuiet(), settings.getProxyObj(),settings.getUserAgent());
+					cssHref = NW.expandComplete(baseURL, cssHref);
+					String res = NW.getHTTP(NW.addProtcol(cssHref),settings.isJsonOutput(),settings.isQuiet(), settings.getProxyObj(),settings.getUserAgent());
 					checkForExternalCSSinExternalFile(baseURL, res, false, settings.isJsonOutput());
 				} catch (Exception e) {
 					if(settings.isJsonOutput()) {
@@ -73,10 +96,9 @@ public class Checker {
 		Matcher m = pattern.matcher(css);
 		while (m.find()) {
 			String checkURL = m.group(captureGroupIndex);
-			if (!baseURL.startsWith(URLHelpers.removePath(GR.clean(checkURL).getSt()))) {
-				if(jsonOutput) {
-					Finding.findings.add(new Finding((inline ? type+"-inline" : type+"-external") ,checkURL));
-				}else{
+			if (!baseURL.startsWith(NW.removePath(CleanableURL.clean(checkURL).getSt()))) {
+				Finding.findings.add(new Finding((inline ? type+"-inline" : type+"-external") ,checkURL));
+				if(!jsonOutput) {
 					System.out.println("-> Found " + (inline ? "inline" : "in external") + " "+tag+" resource from " + checkURL);					
 				}
 			}
@@ -91,8 +113,8 @@ public class Checker {
 			} else {
 				String jsHref = element.attr("src").toLowerCase();
 				try {
-					jsHref = URLHelpers.expandComplete(baseURL, jsHref);
-					String res = URLHelpers.getHTTP(URLHelpers.addProtcol(jsHref),settings.isJsonOutput(),settings.isQuiet(),settings.getProxyObj(),settings.getUserAgent());
+					jsHref = NW.expandComplete(baseURL, jsHref);
+					String res = NW.getHTTP(NW.addProtcol(jsHref),settings.isJsonOutput(),settings.isQuiet(),settings.getProxyObj(),settings.getUserAgent());
 					checkForExternalXHRJSinExternalFile(baseURL, res, false, settings.isJsonOutput());
 				} catch (Exception e) {
 					if(settings.isJsonOutput()) {

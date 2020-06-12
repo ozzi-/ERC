@@ -7,9 +7,9 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
-import ERC.Finding;
-import ERC.Settings;
-import ERC.URLHelpers;
+import helpers.NW;
+import helpers.Settings;
+import model.Finding;
 
 class ERCTest {
 
@@ -18,8 +18,8 @@ class ERCTest {
 		StringBuilder jsonOutputB = new StringBuilder().append("{");
 		Settings settings = new Settings("-", "", "testagent",true, true, true, true, false, true);
 		
-		ArrayList<String> secondLevelDomains = URLHelpers.getPublicSuffixList(false,null, true, "testagent");
-		ERC.ERC.doCheck("https://gist.github.com/ozzi-/eccdc84cb352c6df628bbaef06b83e8c", secondLevelDomains, jsonOutputB, settings);
+		ArrayList<String> secondLevelDomains = NW.getPublicSuffixList(false,null, true, "testagent");
+		erc.ExternalResourceChecker.check("https://gist.github.com/ozzi-/eccdc84cb352c6df628bbaef06b83e8c", secondLevelDomains, jsonOutputB, settings);
 		
 		for (Finding finding : Finding.findings) {
 			System.out.println(finding.getFinding());

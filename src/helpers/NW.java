@@ -1,4 +1,4 @@
-package ERC;
+package helpers;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -9,7 +9,9 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class URLHelpers {
+import model.CleanableURL;
+
+public class NW {
 	
 	public static String expandComplete(String domainName, String href) {
 		if (href.toLowerCase().startsWith("//")) {
@@ -46,13 +48,13 @@ public class URLHelpers {
 		}
 	}
 	
-	static boolean isExternal(String baseURL, GR gr, boolean strict, ArrayList<String> secondLevelDomains) {
-		baseURL = URLHelpers.removePath(baseURL);
+	public static boolean isExternal(String baseURL, CleanableURL gr, boolean strict, ArrayList<String> secondLevelDomains) {
+		baseURL = NW.removePath(baseURL);
 		String checkURL = gr.getSt();
 		if (checkURL.startsWith("/")) {
 			return false;
 		}
-		if (gr.isChanged()) {
+		if (gr.wasCleaned()) {
 			boolean sameURL;
 			if(strict) {
 				sameURL = checkURL.startsWith(baseURL);				
@@ -62,7 +64,7 @@ public class URLHelpers {
 				
 				sameURL = checkURLNoSub.contains(baseURLNoSub);
 				if(!sameURL) {
-					sameURL = baseURLNoSub.contains(URLHelpers.removePath(checkURLNoSub));
+					sameURL = baseURLNoSub.contains(NW.removePath(checkURLNoSub));
 				}
 			}
 			return !sameURL;
@@ -74,7 +76,7 @@ public class URLHelpers {
 		ArrayList<String> secondLevelDomains = new ArrayList<String>();
 		if(loadFromPublicSufficOrg) {
 			try {
-				String a = URLHelpers.getHTTP("https://publicsuffix.org/list/public_suffix_list.dat", false, true, proxy, userAgent);
+				String a = NW.getHTTP("https://publicsuffix.org/list/public_suffix_list.dat", false, true, proxy, userAgent);
 				Scanner scanner = new Scanner(a);
 				while (scanner.hasNextLine()) {
 					String line = scanner.nextLine();
@@ -117,7 +119,7 @@ public class URLHelpers {
 			urlDomain=urlDomain.substring(0, slashPos);
 		}
 		// Done, now let us count the dots . . 
-		int dotCount = StringHelper.countOccurrences(urlDomain, ".");
+		int dotCount = Strng.countOccurrences(urlDomain, ".");
 		// example.com <-- nothing to cut
 		if(dotCount==1){
 			return protocol+url;
@@ -129,7 +131,7 @@ public class URLHelpers {
 			// example: something.co.uk we don't want to cut away "something", since it isn't a subdomain, but the actual domain
 			if(urlDomain.endsWith(secondLevelDomain)) {
 				// we increase the dot offset with the amount of dots in the second level domain (co.uk = +1)
-				dotOffset += StringHelper.countOccurrences(secondLevelDomain, ".");
+				dotOffset += Strng.countOccurrences(secondLevelDomain, ".");
 				break;
 			}
 		}
@@ -138,7 +140,7 @@ public class URLHelpers {
 			return protocol+urlDomain+path;
 		}
 		// if we have sub.something.co.uk, we have a offset of 3 and 3 dots, so we remove "sub"
-		int pos = StringHelper.nthLastIndexOf(dotOffset, ".", urlDomain)+1;
+		int pos = Strng.nthLastIndexOf(dotOffset, ".", urlDomain)+1;
 		urlDomain = urlDomain.substring(pos);	
 		return protocol+urlDomain+path;
 	}
@@ -150,12 +152,12 @@ public class URLHelpers {
 			}
 		}
 			
-		URL obj = new URL(url);
+		URL urlObj = new URL(url);
 		HttpURLConnection conn;
 		if(proxy!=null) {
-			conn = (HttpURLConnection) obj.openConnection(proxy);			
+			conn = (HttpURLConnection) urlObj.openConnection(proxy);			
 		}else {
-			conn = (HttpURLConnection) obj.openConnection();
+			conn = (HttpURLConnection) urlObj.openConnection();
 		}
 		conn.setReadTimeout(7000);
         conn.setRequestProperty("User-Agent", userAgent);
@@ -172,7 +174,7 @@ public class URLHelpers {
 					String newUrl = conn.getHeaderField("Location");
 					conn = (HttpURLConnection) new URL(newUrl).openConnection();
 				}else {
-					Error.errors.add("Error doing HTTP GET for '"+url+"': got response code "+status);
+					model.Error.errors.add("Error doing HTTP GET for '"+url+"': got response code "+status);
 					return "";
 				}
 			}
@@ -186,14 +188,16 @@ public class URLHelpers {
 			}
 			in.close();
 			return html.toString();
+		} catch (javax.net.ssl.SSLHandshakeException e) {
+			model.Error.errors.add("HTTP GET - SSLHandshake Exception occured for '"+url+"': "+e.getMessage());
 		} catch (java.net.UnknownHostException e) {
-			Error.errors.add("Unknown host '"+url+"': "+e.getMessage());
+			model.Error.errors.add("HTTP GET - Unknown host '"+url+"': "+e.getMessage());
 		} catch (java.io.FileNotFoundException e) {
-			Error.errors.add("Could not find (404) '"+url+"': "+e.getMessage());
+			model.Error.errors.add("HTTP GET - Could not find (404) for '"+url+"': "+e.getMessage());
 		} catch (java.net.ConnectException e){
-			Error.errors.add("Error doing HTTP GET for '"+url+"': "+e.getMessage());
+			model.Error.errors.add("HTTP GET - Connection failed for'"+url+"': "+e.getMessage());
 		} catch (Exception e) {
-			e.printStackTrace();
+			model.Error.errors.add("HTTP GET - Uncaught exception occured for '"+url+"': "+e.getMessage());
 		}
 		return "";
 	}
